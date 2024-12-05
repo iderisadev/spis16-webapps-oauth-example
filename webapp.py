@@ -35,13 +35,13 @@ github = oauth.remote_app(
     access_token_url='https://github.com/login/oauth/access_token',  
     authorize_url='https://github.com/login/oauth/authorize' #URL for github's OAuth login
 )
-def main():
-    connection_string = os.environ["MONGO_CONNECTION_STRING"]
-    db_name = os.environ["MONGO_DBNAME"]
-    
-    client = pymongo.MongoClient(connection_string)
-    db = client[db_name]
-    collection=db['Cluster1']
+
+connection_string = os.environ["MONGO_CONNECTION_STRING"]
+db_name = os.environ["MONGO_DBNAME"]
+
+client = pymongo.MongoClient(connection_string)
+db = client[db_name]
+collection=db['Forum01']
 
 #context processors run before templates are rendered and add variable(s) to the template's context
 #context processors must return a dictionary 
@@ -95,13 +95,30 @@ def renderPage1():
 
 @app.route('/page2')
 def renderPage2():
-    followers=session['user_data']['followers']
-    return render_template('page2.html', followers=followers)
+    if 'user_data' in session:
+        followers=session['user_data']['followers']
+    else:
+        followers = 'no'; #needs fixing
+    return render_template('page2.html', follower_user_data=followers)
+@app.route('/answerForumOne',methods=['GET','POST'])
+def renderForumOneAnswers():
+    if "user_data" in session:
+        forumPost=request.form['ques1']
+        doc = {"username":session['user_data']['login'], "number":"ee","text":forumPost}
+     
+        collection.insert_one(doc)
+        
 
+    return render_template('page2.html')
+
+    
+def numberPost():
+    
 @app.route('/googleb4c3aeedcc2dd103.html')
 def render_google_verification():
     return render_template('googleb4c3aeedcc2dd103.html')
 
+    
 #the tokengetter is automatically called to check who is logged in.
 @github.tokengetter
 def get_github_oauth_token():
