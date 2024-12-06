@@ -8,6 +8,7 @@ import sys
 import pprint
 from flask_oauthlib.client import OAuth
 from flask import render_template
+from markupsafe import Markup
 
 # This code originally from https://github.com/lepture/flask-oauthlib/blob/master/example/github.py
 # Edited by P. Conrad for SPIS 2016 to add getting Client Id and Secret from
@@ -42,7 +43,10 @@ db_name = os.environ["MONGO_DBNAME"]
 client = pymongo.MongoClient(connection_string)
 db = client[db_name]
 collection=db['Forum01']
-
+x=0
+for anything in collection.find():
+    print(anything)
+        
 #context processors run before templates are rendered and add variable(s) to the template's context
 #context processors must return a dictionary 
 #this context processor adds the variable logged_in to the conext for all templates
@@ -107,12 +111,24 @@ def renderForumOneAnswers():
         doc = {"username":session['user_data']['login'], "number":"ee","text":forumPost}
      
         collection.insert_one(doc)
-        
-
-    return render_template('page2.html')
+    for anything in collection.find():
+        firstPost=anything["text"]
+    firstPost=get_posts()    
+       
+    
+    
+          
+    return render_template('page2.html', firstPost=firstPost)
 
     
-def numberPost():
+def get_posts():
+    messages=[]
+    for s in collection.find():
+        messages.append(s["text"])
+    option=""
+    for s in messages:
+        option += Markup("<option value=\"" + str(s) + "\">" + str(s) + "</option>") #Use Markup so <, >, " are not escaped lt, gt, etc.
+    return option
     
 @app.route('/googleb4c3aeedcc2dd103.html')
 def render_google_verification():
