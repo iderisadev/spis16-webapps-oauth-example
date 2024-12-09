@@ -9,6 +9,7 @@ import pprint
 from flask_oauthlib.client import OAuth
 from flask import render_template
 from markupsafe import Markup
+from pymongo import DESCENDING
 
 # This code originally from https://github.com/lepture/flask-oauthlib/blob/master/example/github.py
 # Edited by P. Conrad for SPIS 2016 to add getting Client Id and Secret from
@@ -103,7 +104,8 @@ def renderPage2():
         followers=session['user_data']['followers']
     else:
         followers = 'no'; #needs fixing
-    return render_template('page2.html', follower_user_data=followers)
+    firstPost=get_posts()  
+    return render_template('page2.html', follower_user_data=followers, firstPost=firstPost)
 @app.route('/answerForumOne',methods=['GET','POST'])
 def renderForumOneAnswers():
     if "user_data" in session:
@@ -122,14 +124,14 @@ def renderForumOneAnswers():
 
     
 def get_posts():
-    messages=[]
-    for s in collection.find():
-        messages.append(s["text"])
-    option=""
-    for s in messages:
-        option += Markup("<option value=\"" + str(s) + "\">" + str(s) + "</option>") #Use Markup so <, >, " are not escaped lt, gt, etc.
-    return option
+    option = []
+    for s in collection.find().sort('_id', DESCENDING):
+        formatted_post = f"<pre>{s['username']} : {s['text']}</pre>"
+        option.append(formatted_post)
     
+    return Markup("".join(option))
+    # the join thing takes the character before the.join and adds it in between the values in the list to make it a string
+    # used perplexity to get the descending thing 
 @app.route('/googleb4c3aeedcc2dd103.html')
 def render_google_verification():
     return render_template('googleb4c3aeedcc2dd103.html')
