@@ -45,8 +45,7 @@ client = pymongo.MongoClient(connection_string)
 db = client[db_name]
 collection=db['Forum01']
 x=0
-for anything in collection.find():
-    print(anything)
+
         
 #context processors run before templates are rendered and add variable(s) to the template's context
 #context processors must return a dictionary 
